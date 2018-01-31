@@ -12,21 +12,22 @@ namespace BloomFilters
     class BloomFilter
     {
         public bool[] BitMap { get; set; }
-
+        private int lengthOfBitMap;
         public BloomFilter()
         {
-            BitMap = new bool[short.MaxValue-short.MinValue+1];
+            lengthOfBitMap = short.MaxValue;
+            BitMap = new bool[lengthOfBitMap];
         }
 
         public void SetBits(string word)
         {
             var inputBytes = Encoding.ASCII.GetBytes(word);
             var initialHashBytes = Hash(inputBytes);
-            
-            for (int i = 0; i < 8; i++)
+            //Console.WriteLine(initialHashBytes.Length);
+            for (int i = 0; i < 4; i++)
             { 
-                var newHashBytes = Hash(Hash(initialHashBytes));
-                var num = BitConverter.ToInt16(newHashBytes,i*2)-short.MinValue;
+                var num = Math.Abs(BitConverter.ToInt32(initialHashBytes,i*4)%lengthOfBitMap);
+                //Console.WriteLine(num);
                 BitMap[num] = true;
             }
         }
@@ -36,10 +37,9 @@ namespace BloomFilters
             var inputBytes = Encoding.ASCII.GetBytes(word);
             var initialHashBytes = Hash(inputBytes);
 
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 4; i++)
             {
-                var newHashBytes = Hash(Hash(initialHashBytes));
-                var num = BitConverter.ToInt16(newHashBytes, i * 2) - short.MinValue;
+                var num = Math.Abs(BitConverter.ToInt32(initialHashBytes, i * 4)%lengthOfBitMap);
                 if (!BitMap[num])
                 {
                     return false;

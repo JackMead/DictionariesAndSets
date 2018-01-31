@@ -68,7 +68,7 @@ namespace BloomFilters
                 }
             }
 
-            Console.WriteLine();
+            Console.WriteLine("Missed {0} words", missed);
 
         }
 
