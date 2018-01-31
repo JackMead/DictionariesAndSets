@@ -13,9 +13,12 @@ namespace BloomFilters
     {
         public bool[] BitMap { get; set; }
         private int lengthOfBitMap;
+        private int numberOfHashes;
+
         public BloomFilter()
         {
-            lengthOfBitMap = short.MaxValue;
+            numberOfHashes = 4;
+            lengthOfBitMap = (int)Math.Pow(2, 19);
             BitMap = new bool[lengthOfBitMap];
         }
 
@@ -23,12 +26,11 @@ namespace BloomFilters
         {
             var inputBytes = Encoding.ASCII.GetBytes(word);
             var initialHashBytes = Hash(inputBytes);
-            //Console.WriteLine(initialHashBytes.Length);
-            for (int i = 0; i < 4; i++)
-            { 
-                var num = Math.Abs(BitConverter.ToInt32(initialHashBytes,i*4)%lengthOfBitMap);
-                //Console.WriteLine(num);
+            for (int hashNumber = 0; hashNumber < numberOfHashes; hashNumber++)
+            {
+                var num = Math.Abs(BitConverter.ToInt32(initialHashBytes, 0) % lengthOfBitMap);
                 BitMap[num] = true;
+                initialHashBytes = Hash(initialHashBytes);
             }
         }
 
@@ -37,14 +39,17 @@ namespace BloomFilters
             var inputBytes = Encoding.ASCII.GetBytes(word);
             var initialHashBytes = Hash(inputBytes);
 
-            for (int i = 0; i < 4; i++)
+            for (int hashNumber = 0; hashNumber < numberOfHashes; hashNumber++)
             {
-                var num = Math.Abs(BitConverter.ToInt32(initialHashBytes, i * 4)%lengthOfBitMap);
+                var num = Math.Abs(BitConverter.ToInt32(initialHashBytes, 0) % lengthOfBitMap);
                 if (!BitMap[num])
                 {
                     return false;
-                } 
+                }
+                initialHashBytes = Hash(initialHashBytes);
+
             }
+
             return true;
         }
 
